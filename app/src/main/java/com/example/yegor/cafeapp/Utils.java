@@ -1,8 +1,10 @@
 package com.example.yegor.cafeapp;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.util.DisplayMetrics;
 
 import com.example.yegor.cafeapp.models.Param;
 
@@ -10,7 +12,7 @@ import java.util.List;
 
 public class Utils {
 
-    public static String getParamByName(List<Param> params, String paramName){
+    public static String getParamByName(List<Param> params, String paramName) {
 
         String val = "";
 
@@ -31,5 +33,10 @@ public class Utils {
         return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
+    public static int dp2pixel(float dp) {
+        Resources resources = App.getContext().getResources();
+        DisplayMetrics metrics = resources.getDisplayMetrics();
+        return (int) (dp * ((float) metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT));
+    }
 
 }

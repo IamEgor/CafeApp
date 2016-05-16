@@ -10,4 +10,5 @@
     <string name="weight">Вес - %s</string>
     <string name="title_activity_maps">Map</string>
     <string name="retry">Retry</string>
+    <string name="no_address">Не адреса для этого места</string>
 </resources>
