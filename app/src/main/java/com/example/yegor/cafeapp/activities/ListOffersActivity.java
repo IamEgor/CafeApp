@@ -45,12 +45,12 @@ public class ListOffersActivity extends BaseActivity implements
         rv.setLayoutManager(new LinearLayoutManager(this));
         rv.setAdapter(adapter);
 
-        findViewById(R.id.retry_btn).setOnClickListener(
-                v -> getLoaderManager()
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
+        findViewById(R.id.retry_btn).setOnClickListener(v ->
+                getLoaderManager()
                         .restartLoader(0, getIntent().getExtras(), ListOffersActivity.this)
                         .forceLoad());
 
-        toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
         getLoaderManager().initLoader(0, getIntent().getExtras(), this).forceLoad();
     }
@@ -106,10 +106,6 @@ public class ListOffersActivity extends BaseActivity implements
                 break;
         }
 
-    }
-
-    private enum Status {
-        LOADING, OK, FAILED
     }
 
 }

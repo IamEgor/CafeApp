@@ -50,7 +50,7 @@ public class CategoriesActivity extends BaseActivity
 
     @Override
     protected int getLayoutId() {
-        return R.layout.content_categories;
+        return R.layout.activity_categories;
     }
 
     class SetAdapterModels extends AsyncTask<Void, Void, List<CategoryModel>> {

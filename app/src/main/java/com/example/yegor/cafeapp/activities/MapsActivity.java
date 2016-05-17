@@ -8,11 +8,14 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
 
 import com.example.yegor.cafeapp.App;
 import com.example.yegor.cafeapp.R;
 import com.example.yegor.cafeapp.Utils;
+import com.example.yegor.cafeapp.exceptions.NoConnectionException;
+import com.example.yegor.cafeapp.models.adapter.ContentWrapper;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -29,6 +32,8 @@ import java.util.Random;
 
 public class MapsActivity extends BaseActivity implements OnMapReadyCallback {
 
+    private View errorView;
+    private TextView errorMessage;
 
     private GoogleMap mMap;
     private MapView mapView;
@@ -37,10 +42,14 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        errorView = findViewById(R.id.error_view);
+        errorMessage = (TextView) findViewById(R.id.error_message);
         mapView = (MapView) findViewById(R.id.nav_map);
         mapView.onCreate(savedInstanceState);
 
         mapView.getMapAsync(this);
+
+        findViewById(R.id.retry_btn).setOnClickListener(v -> (new LoadMarkers(4)).execute());
 
     }
 
@@ -87,7 +96,22 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback {
 
     }
 
-    class LoadMarkers extends AsyncTask<Void, MarkerOptions, CameraUpdate> {
+    private void setStatus(Status status) {
+
+        switch (status) {
+            case OK:
+                mapView.setVisibility(View.VISIBLE);
+                errorView.setVisibility(View.GONE);
+                break;
+            case FAILED:
+                errorView.setVisibility(View.VISIBLE);
+                mapView.setVisibility(View.GONE);
+                break;
+        }
+
+    }
+
+    class LoadMarkers extends AsyncTask<Void, MarkerOptions, ContentWrapper<CameraUpdate>> {
 
         private Geocoder geocoder;
         private List<Address> fromLocation;
@@ -99,14 +123,14 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback {
         }
 
         @Override
-        protected void onPreExecute() {
-            geocoder = new Geocoder(App.getContext(), Locale.getDefault());
-        }
+        protected ContentWrapper<CameraUpdate> doInBackground(Void... params) {
 
-        @Override
-        protected CameraUpdate doInBackground(Void... params) {
+            if (!Utils.hasConnection())
+                return new ContentWrapper<>(new NoConnectionException());
+
 
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
+            geocoder = new Geocoder(App.getContext(), Locale.getDefault());
 
             LatLng latLng;
             String title;
@@ -120,23 +144,33 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback {
                     builder.include(latLng);
                     publishProgress(new MarkerOptions().position(latLng).title(title));
                 } catch (IOException e) {
-                    Log.e("LoadMarkers doInBackg", e.getMessage());
-                    throw new RuntimeException();
+                    return new ContentWrapper<>(e);
                 }
 
             }
 
-            return CameraUpdateFactory.newLatLngBounds(builder.build(), padding);
+            return new ContentWrapper<>(CameraUpdateFactory.newLatLngBounds(builder.build(), padding));
         }
 
         @Override
         protected void onProgressUpdate(MarkerOptions... values) {
+            if (mapView.getVisibility() == View.GONE)
+                setStatus(BaseActivity.Status.OK);
             mMap.addMarker(values[0]);
         }
 
         @Override
-        protected void onPostExecute(CameraUpdate cameraUpdate) {
-            mMap.animateCamera(cameraUpdate);
+        protected void onPostExecute(ContentWrapper<CameraUpdate> content) {
+            if (content.getException() == null && content.getContent() != null) {
+                mMap.animateCamera(content.getContent());
+                setStatus(BaseActivity.Status.OK);
+            } else if (content.getException() != null
+                    && content.getException() instanceof NoConnectionException) {
+                errorMessage.setText(content.getException().getMessage());
+                setStatus(BaseActivity.Status.FAILED);
+            } else
+                throw new RuntimeException(content.getException().getMessage());
+
         }
 
         private String getAddress(LatLng latLng) throws IOException {

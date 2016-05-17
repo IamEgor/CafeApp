@@ -28,6 +28,10 @@
 
         </android.support.design.widget.AppBarLayout>
 
+        <include layout="@layout/item_error_view" />
+
+        <include layout="@layout/item_loading_view" />
+
     </android.support.design.widget.CoordinatorLayout>
 
 

@@ -74,5 +74,8 @@ public abstract class BaseActivity extends AppCompatActivity implements
     @LayoutRes
     protected abstract int getLayoutId();
 
+    protected enum Status {
+        LOADING, OK, FAILED
+    }
 
 }
