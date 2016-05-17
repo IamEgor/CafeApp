@@ -1,4 +1,4 @@
-package com.example.yegor.cafeapp.models;
+package com.example.yegor.cafeapp.models.adapter;
 
 public class ContentWrapper<T> {
 

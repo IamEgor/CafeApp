@@ -11,7 +11,7 @@ import android.view.View;
 
 import com.example.yegor.cafeapp.R;
 import com.example.yegor.cafeapp.adapters.CategoriesAdapter;
-import com.example.yegor.cafeapp.models.Category;
+import com.example.yegor.cafeapp.models.CategoryModel;
 import com.example.yegor.cafeapp.storage.MySQLiteClass;
 import com.example.yegor.cafeapp.view.MyDecorator;
 
@@ -31,7 +31,7 @@ public class CategoriesActivity extends BaseActivity
         assert rv != null;
         rv.setLayoutManager(new GridLayoutManager(this, 2));
 
-        adapter = new CategoriesAdapter(new ArrayList<Category>(0));
+        adapter = new CategoriesAdapter(new ArrayList<>(0));
         rv.setAdapter(adapter);
         rv.addItemDecoration(new MyDecorator(4));
 
@@ -40,11 +40,12 @@ public class CategoriesActivity extends BaseActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
+        drawer.addDrawerListener(toggle);
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
     }
 
     @Override
@@ -52,7 +53,7 @@ public class CategoriesActivity extends BaseActivity
         return R.layout.content_categories;
     }
 
-    class SetAdapterModels extends AsyncTask<Void, Void, List<Category>> {
+    class SetAdapterModels extends AsyncTask<Void, Void, List<CategoryModel>> {
 
         @Override
         protected void onPreExecute() {
@@ -60,28 +61,79 @@ public class CategoriesActivity extends BaseActivity
         }
 
         @Override
-        protected List<Category> doInBackground(Void... params) {
+        protected List<CategoryModel> doInBackground(Void... params) {
 
             MySQLiteClass sqLiteClass = new MySQLiteClass(CategoriesActivity.this);
             if (!sqLiteClass.isCatTableExists()) {
-                ArrayList<Category> categoryModels = new ArrayList<Category>() {
-                    {
-                        add(new Category.Builder().setId(24).setCategory("Шашлыки").setImage(R.drawable.ic_cat_kebab_24).create());
-                        add(new Category.Builder().setId(23).setCategory("Добавки").setImage(R.drawable.ic_cat_sauce_23).create());
-                        add(new Category.Builder().setId(18).setCategory("Роллы").setImage(R.drawable.ic_cat_maki_18).create());
-                        add(new Category.Builder().setId(10).setCategory("Десерты").setImage(R.drawable.ic_cat_ice_cream_10).create());
-                        add(new Category.Builder().setId(9).setCategory("Напитки").setImage(R.drawable.ic_cat_glass_9).create());
-                        add(new Category.Builder().setId(5).setCategory("Суши").setImage(R.drawable.ic_cat_sushi_5).create());
-                        add(new Category.Builder().setId(2).setCategory("Сеты").setImage(R.drawable.ic_cat_sushi_2).create());
-                        add(new Category.Builder().setId(6).setCategory("Супы").setImage(R.drawable.ic_cat_soup_bowl_6).create());
-                        add(new Category.Builder().setId(7).setCategory("Салаты").setImage(R.drawable.ic_cat_salad_7).create());
-                        add(new Category.Builder().setId(8).setCategory("Теплое").setImage(R.drawable.ic_cat_first_8).create());
-                        add(new Category.Builder().setId(20).setCategory("Закуски").setImage(R.drawable.ic_cat_nachos_20).create());
-                        add(new Category.Builder().setId(3).setCategory("Лапша").setImage(R.drawable.ic_cat_noodles_3).create());
-                        add(new Category.Builder().setId(25).setCategory("Конструктор").setImage(R.drawable.ic_cat_custom_25).create());
-                        add(new Category.Builder().setId(1).setCategory("Пицца").setImage(R.drawable.ic_cat_pizza_1).create());
-                    }
-                };
+                ArrayList<CategoryModel> categoryModels = new ArrayList<CategoryModel>() {{
+                    add(new CategoryModel.Builder()
+                            .setId(24)
+                            .setCategory("Шашлыки")
+                            .setImage(R.drawable.ic_cat_kebab_24)
+                            .create());
+                    add(new CategoryModel.Builder()
+                            .setId(23)
+                            .setCategory("Добавки")
+                            .setImage(R.drawable.ic_cat_sauce_23)
+                            .create());
+                    add(new CategoryModel.Builder()
+                            .setId(18)
+                            .setCategory("Роллы")
+                            .setImage(R.drawable.ic_cat_maki_18)
+                            .create());
+                    add(new CategoryModel.Builder().setId(10)
+                            .setCategory("Десерты")
+                            .setImage(R.drawable.ic_cat_ice_cream_10).create());
+                    add(new CategoryModel.Builder()
+                            .setId(9)
+                            .setCategory("Напитки")
+                            .setImage(R.drawable.ic_cat_glass_9)
+                            .create());
+                    add(new CategoryModel.Builder()
+                            .setId(5)
+                            .setCategory("Суши")
+                            .setImage(R.drawable.ic_cat_sushi_5)
+                            .create());
+                    add(new CategoryModel.Builder()
+                            .setId(2)
+                            .setCategory("Сеты")
+                            .setImage(R.drawable.ic_cat_sushi_2).create());
+                    add(new CategoryModel.Builder()
+                            .setId(6)
+                            .setCategory("Супы")
+                            .setImage(R.drawable.ic_cat_soup_bowl_6)
+                            .create());
+                    add(new CategoryModel.Builder()
+                            .setId(7)
+                            .setCategory("Салаты")
+                            .setImage(R.drawable.ic_cat_salad_7)
+                            .create());
+                    add(new CategoryModel.Builder()
+                            .setId(8)
+                            .setCategory("Теплое")
+                            .setImage(R.drawable.ic_cat_first_8)
+                            .create());
+                    add(new CategoryModel.Builder()
+                            .setId(20)
+                            .setCategory("Закуски")
+                            .setImage(R.drawable.ic_cat_nachos_20)
+                            .create());
+                    add(new CategoryModel.Builder()
+                            .setId(3)
+                            .setCategory("Лапша")
+                            .setImage(R.drawable.ic_cat_noodles_3)
+                            .create());
+                    add(new CategoryModel.Builder()
+                            .setId(25)
+                            .setCategory("Конструктор")
+                            .setImage(R.drawable.ic_cat_custom_25)
+                            .create());
+                    add(new CategoryModel.Builder()
+                            .setId(1)
+                            .setCategory("Пицца")
+                            .setImage(R.drawable.ic_cat_pizza_1)
+                            .create());
+                }};
                 sqLiteClass.addCategories(categoryModels);
                 return categoryModels;
             } else
@@ -90,7 +142,7 @@ public class CategoriesActivity extends BaseActivity
         }
 
         @Override
-        protected void onPostExecute(List<Category> categoryModels) {
+        protected void onPostExecute(List<CategoryModel> categoryModels) {
             adapter.setModels(categoryModels);
             findViewById(R.id.loading_view).setVisibility(View.GONE);
         }

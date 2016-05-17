@@ -7,7 +7,7 @@ import org.simpleframework.xml.Root;
 import org.simpleframework.xml.Text;
 
 @Root
-public class Category {
+public class CategoryModel {
 
     public static final String ID_EXTRA = "ID_EXTRA";
     public static final String ID = "ID";
@@ -21,10 +21,10 @@ public class Category {
     @DrawableRes
     private int image;
 
-    public Category() {
+    public CategoryModel() {
     }
 
-    public Category(int id, String category, int image) {
+    public CategoryModel(int id, String category, int image) {
         this.id = id;
         this.category = category;
         this.image = image;
@@ -72,8 +72,8 @@ public class Category {
             return this;
         }
 
-        public Category create() {
-            return new Category(id, category, image);
+        public CategoryModel create() {
+            return new CategoryModel(id, category, image);
         }
     }
 

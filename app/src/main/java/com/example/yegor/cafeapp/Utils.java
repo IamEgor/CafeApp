@@ -6,18 +6,18 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.DisplayMetrics;
 
-import com.example.yegor.cafeapp.models.Param;
+import com.example.yegor.cafeapp.models.ParamModel;
 
 import java.util.List;
 
 public class Utils {
 
-    public static String getParamByName(List<Param> params, String paramName) {
+    public static String getParamByName(List<ParamModel> params, String paramName) {
 
         String val = "";
 
         if (params != null)
-            for (Param param : params)
+            for (ParamModel param : params)
                 if (paramName.equals(param.getName()))
                     val = param.getText();
 

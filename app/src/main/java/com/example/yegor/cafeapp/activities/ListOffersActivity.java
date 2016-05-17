@@ -12,15 +12,15 @@ import com.example.yegor.cafeapp.R;
 import com.example.yegor.cafeapp.adapters.ListOffersAdapter;
 import com.example.yegor.cafeapp.exceptions.NoConnectionException;
 import com.example.yegor.cafeapp.loader.AsyncLoader;
-import com.example.yegor.cafeapp.models.Category;
-import com.example.yegor.cafeapp.models.ContentWrapper;
-import com.example.yegor.cafeapp.models.Offer;
+import com.example.yegor.cafeapp.models.CategoryModel;
+import com.example.yegor.cafeapp.models.adapter.ContentWrapper;
+import com.example.yegor.cafeapp.models.OfferModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ListOffersActivity extends BaseActivity implements
-        LoaderManager.LoaderCallbacks<ContentWrapper<List<Offer>>> {
+        LoaderManager.LoaderCallbacks<ContentWrapper<List<OfferModel>>> {
 
     private RecyclerView rv;
     private View loadingView, errorView;
@@ -40,26 +40,17 @@ public class ListOffersActivity extends BaseActivity implements
         errorView = findViewById(R.id.error_view);
         errorMessage = (TextView) findViewById(R.id.error_message);
 
-        adapter = new ListOffersAdapter(this, new ArrayList<Offer>(0));
+        adapter = new ListOffersAdapter(this, new ArrayList<>(0));
 
         rv.setLayoutManager(new LinearLayoutManager(this));
         rv.setAdapter(adapter);
 
-        findViewById(R.id.retry_btn).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getLoaderManager()
+        findViewById(R.id.retry_btn).setOnClickListener(
+                v -> getLoaderManager()
                         .restartLoader(0, getIntent().getExtras(), ListOffersActivity.this)
-                        .forceLoad();
-            }
-        });
+                        .forceLoad());
 
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-            }
-        });
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
         getLoaderManager().initLoader(0, getIntent().getExtras(), this).forceLoad();
     }
@@ -70,14 +61,14 @@ public class ListOffersActivity extends BaseActivity implements
     }
 
     @Override
-    public Loader<ContentWrapper<List<Offer>>> onCreateLoader(int id, Bundle args) {
+    public Loader<ContentWrapper<List<OfferModel>>> onCreateLoader(int id, Bundle args) {
         setStatus(Status.LOADING);
-        return new AsyncLoader(this, args.getInt(Category.ID_EXTRA));
+        return new AsyncLoader(this, args.getInt(CategoryModel.ID_EXTRA));
     }
 
     @Override
-    public void onLoadFinished(Loader<ContentWrapper<List<Offer>>> loader,
-                               ContentWrapper<List<Offer>> data) {
+    public void onLoadFinished(Loader<ContentWrapper<List<OfferModel>>> loader,
+                               ContentWrapper<List<OfferModel>> data) {
 
         if (data.getException() == null && data.getContent() != null) {
             adapter.setModels(data.getContent());
@@ -91,8 +82,8 @@ public class ListOffersActivity extends BaseActivity implements
     }
 
     @Override
-    public void onLoaderReset(Loader<ContentWrapper<List<Offer>>> loader) {
-        adapter.setModels(new ArrayList<Offer>(0));
+    public void onLoaderReset(Loader<ContentWrapper<List<OfferModel>>> loader) {
+        adapter.setModels(new ArrayList<>(0));
     }
 
     private void setStatus(Status status) {
@@ -120,6 +111,5 @@ public class ListOffersActivity extends BaseActivity implements
     private enum Status {
         LOADING, OK, FAILED
     }
-
 
 }

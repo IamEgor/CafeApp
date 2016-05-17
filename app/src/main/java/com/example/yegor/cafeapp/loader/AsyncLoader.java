@@ -5,9 +5,9 @@ import android.content.Context;
 
 import com.example.yegor.cafeapp.Utils;
 import com.example.yegor.cafeapp.exceptions.NoConnectionException;
-import com.example.yegor.cafeapp.models.ContentWrapper;
-import com.example.yegor.cafeapp.models.Offer;
-import com.example.yegor.cafeapp.models.Yml_catalog;
+import com.example.yegor.cafeapp.models.adapter.ContentWrapper;
+import com.example.yegor.cafeapp.models.OfferModel;
+import com.example.yegor.cafeapp.models.YmlCatalogModel;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
 import retrofit2.http.GET;
 
-public class AsyncLoader extends AsyncTaskLoader<ContentWrapper<List<Offer>>> {
+public class AsyncLoader extends AsyncTaskLoader<ContentWrapper<List<OfferModel>>> {
 
     private static final String API_BASE_URL = "http://ufa.farfor.ru/getyml/";
 
@@ -32,7 +32,7 @@ public class AsyncLoader extends AsyncTaskLoader<ContentWrapper<List<Offer>>> {
     }
 
     @Override
-    public ContentWrapper<List<Offer>> loadInBackground() {
+    public ContentWrapper<List<OfferModel>> loadInBackground() {
 
         if (!Utils.hasConnection()) {
             try {
@@ -52,10 +52,10 @@ public class AsyncLoader extends AsyncTaskLoader<ContentWrapper<List<Offer>>> {
 
         Json service = retrofit.create(Json.class);
 
-        Call<Yml_catalog> data = service.getAllOrders();
+        Call<YmlCatalogModel> data = service.getAllOrders();
         try {
-            List<Offer> offers = new ArrayList<>();
-            for (Offer offer : data.execute().body().getShop().getOffers())
+            List<OfferModel> offers = new ArrayList<>();
+            for (OfferModel offer : data.execute().body().getShop().getOffers())
                 if (String.valueOf(catId).equals(offer.getCategoryId()))
                     offers.add(offer);
 
@@ -68,7 +68,7 @@ public class AsyncLoader extends AsyncTaskLoader<ContentWrapper<List<Offer>>> {
 
     interface Json {
         @GET("?key=ukAXxeJYZN")
-        Call<Yml_catalog> getAllOrders();
+        Call<YmlCatalogModel> getAllOrders();
     }
 
 }

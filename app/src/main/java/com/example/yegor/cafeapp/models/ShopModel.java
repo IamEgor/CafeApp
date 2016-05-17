@@ -6,26 +6,26 @@ import org.simpleframework.xml.Root;
 import java.util.List;
 
 @Root
-public class Shop {
+public class ShopModel {
 
     @ElementList(name = "categories")
-    private List<Category> categories;
+    private List<CategoryModel> categories;
     @ElementList
-    private List<Offer> offers;
+    private List<OfferModel> offers;
 
-    public Shop() {
+    public ShopModel() {
     }
 
-    public Shop(List<Category> categories, List<Offer> offers) {
+    public ShopModel(List<CategoryModel> categories, List<OfferModel> offers) {
         this.categories = categories;
         this.offers = offers;
     }
 
-    public List<Category> getCategories() {
+    public List<CategoryModel> getCategories() {
         return categories;
     }
 
-    public List<Offer> getOffers() {
+    public List<OfferModel> getOffers() {
         return offers;
     }
 

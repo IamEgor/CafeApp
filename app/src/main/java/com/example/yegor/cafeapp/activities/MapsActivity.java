@@ -23,7 +23,6 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
@@ -88,21 +87,6 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback {
 
     }
 
-    private List<LatLng> geLatLangList() {
-
-        List<LatLng> latLngs = new ArrayList<>(25);
-
-        Random lat = new Random();
-        Random lang = new Random();
-
-        for (int i = 0; i < 25; i++) {
-            latLngs.add(new LatLng(lat.nextInt(30) + 36, lang.nextInt(60) + 16));
-        }
-
-        return latLngs;
-    }
-
-
     class LoadMarkers extends AsyncTask<Void, MarkerOptions, CameraUpdate> {
 
         private Geocoder geocoder;
@@ -142,7 +126,7 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback {
 
             }
 
-            return CameraUpdateFactory.newLatLngBounds(builder.build(), 0);
+            return CameraUpdateFactory.newLatLngBounds(builder.build(), padding);
         }
 
         @Override

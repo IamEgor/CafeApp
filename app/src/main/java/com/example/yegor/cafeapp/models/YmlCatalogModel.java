@@ -5,17 +5,17 @@ import org.simpleframework.xml.Element;
 import org.simpleframework.xml.Root;
 
 @Root(name = "yml_catalog")
-    public class Yml_catalog {
+    public class YmlCatalogModel {
 
     @Attribute(name = "date")
     private String date;
     @Element(name = "shop")
-    private Shop shop;
+    private ShopModel shop;
 
-    public Yml_catalog() {
+    public YmlCatalogModel() {
     }
 
-    public Yml_catalog(String date, Shop shop) {
+    public YmlCatalogModel(String date, ShopModel shop) {
         this.date = date;
         this.shop = shop;
     }
@@ -24,7 +24,7 @@ import org.simpleframework.xml.Root;
         return date;
     }
 
-    public Shop getShop() {
+    public ShopModel getShop() {
         return shop;
     }
 

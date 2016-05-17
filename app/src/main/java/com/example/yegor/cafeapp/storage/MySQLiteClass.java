@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.example.yegor.cafeapp.models.Category;
+import com.example.yegor.cafeapp.models.CategoryModel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,32 +50,32 @@ public class MySQLiteClass {
         return dbhelp.isTableExists(thisDataBase, CATEGORY_TABLE);
     }
 
-    private void addCategory(Category category) {
+    private void addCategory(CategoryModel category) {
 
         ContentValues values = new ContentValues();
 
-        values.put(Category.ID, category.getId());
-        values.put(Category.NAME, category.getCategory());
-        values.put(Category.IMAGE, category.getImage());
+        values.put(CategoryModel.ID, category.getId());
+        values.put(CategoryModel.NAME, category.getCategory());
+        values.put(CategoryModel.IMAGE, category.getImage());
 
         thisDataBase.insert(CATEGORY_TABLE, null, values);
 
     }
 
-    public void addCategories(List<Category> categories) {
+    public void addCategories(List<CategoryModel> categories) {
 
         open(true);
 
-        for (Category category : categories)
+        for (CategoryModel category : categories)
             addCategory(category);
 
         close();
 
     }
 
-    public List<Category> getAllCategories() {
+    public List<CategoryModel> getAllCategories() {
 
-        List<Category> categories = new ArrayList<>();
+        List<CategoryModel> categories = new ArrayList<>();
 
         String selectQuery = "SELECT  * FROM " + CATEGORY_TABLE;
 
@@ -86,7 +86,7 @@ public class MySQLiteClass {
         if (cursor.moveToFirst()) {
             do {
 
-                Category contact = new Category.Builder()
+                CategoryModel contact = new CategoryModel.Builder()
                         .setId(Integer.parseInt(cursor.getString(1)))
                         .setCategory(cursor.getString(2))
                         .setImage(Integer.parseInt(cursor.getString(3)))
@@ -112,7 +112,7 @@ public class MySQLiteClass {
 
         Cursor cursor = thisDataBase.query(
                 CATEGORY_TABLE,
-                new String[]{Category.ID, Category.IMAGE},
+                new String[]{CategoryModel.ID, CategoryModel.IMAGE},
                 null, null, null, null, null);
 
         if (cursor.moveToFirst()) {
@@ -133,9 +133,9 @@ public class MySQLiteClass {
         private final String CREATE_CURRENCY_TABLE =
                 "CREATE TABLE " + CATEGORY_TABLE + "(" +
                         "_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                        Category.ID + " INTEGER, " +
-                        Category.NAME + " TEXT NOT NULL, " +
-                        Category.IMAGE + " INTEGER);";
+                        CategoryModel.ID + " INTEGER, " +
+                        CategoryModel.NAME + " TEXT NOT NULL, " +
+                        CategoryModel.IMAGE + " INTEGER);";
 
         public DBHelp(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);

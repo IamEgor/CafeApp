@@ -5,17 +5,17 @@ import org.simpleframework.xml.Root;
 import org.simpleframework.xml.Text;
 
 @Root
-public class Param {
+public class ParamModel {
 
     @Attribute
     private String name;
     @Text
     private String text;
 
-    public Param() {
+    public ParamModel() {
     }
 
-    public Param(String name, String text) {
+    public ParamModel(String name, String text) {
         this.name = name;
         this.text = text;
     }

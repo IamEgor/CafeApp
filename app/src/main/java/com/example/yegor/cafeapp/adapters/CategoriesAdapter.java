@@ -12,19 +12,19 @@ import android.widget.TextView;
 import com.example.yegor.cafeapp.App;
 import com.example.yegor.cafeapp.R;
 import com.example.yegor.cafeapp.activities.ListOffersActivity;
-import com.example.yegor.cafeapp.models.Category;
+import com.example.yegor.cafeapp.models.CategoryModel;
 
 import java.util.List;
 
 public class CategoriesAdapter extends RecyclerView.Adapter<CategoriesAdapter.ViewHolder> {
 
-    private List<Category> models;
+    private List<CategoryModel> models;
 
-    public CategoriesAdapter(List<Category> models) {
+    public CategoriesAdapter(List<CategoryModel> models) {
         this.models = models;
     }
 
-    public void setModels(List<Category> models) {
+    public void setModels(List<CategoryModel> models) {
         this.models = models;
         notifyDataSetChanged();
     }
@@ -36,17 +36,14 @@ public class CategoriesAdapter extends RecyclerView.Adapter<CategoriesAdapter.Vi
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        final Category model = models.get(position);
+        final CategoryModel model = models.get(position);
         holder.setImage(model.getImage());
         holder.setText(model.getCategory());
-        holder.setClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(App.getContext(), ListOffersActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra(Category.ID_EXTRA, model.getId());
-                App.getContext().startActivity(intent);
-            }
+        holder.setClickListener(v -> {
+            Intent intent = new Intent(App.getContext(), ListOffersActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtra(CategoryModel.ID_EXTRA, model.getId());
+            App.getContext().startActivity(intent);
         });
     }
 

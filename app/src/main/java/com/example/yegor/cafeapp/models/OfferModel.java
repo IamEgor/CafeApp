@@ -11,21 +11,20 @@ import org.simpleframework.xml.Root;
 import java.util.List;
 
 @Root
-public class Offer implements Parcelable {
-
-    public static final Creator<Offer> CREATOR = new Creator<Offer>() {
-        @Override
-        public Offer createFromParcel(Parcel in) {
-            return new Offer(in);
-        }
-
-        @Override
-        public Offer[] newArray(int size) {
-            return new Offer[size];
-        }
-    };
+public class OfferModel implements Parcelable {
 
     public static final String EXTRA = "OFFER_EXTRA";
+    public static final Creator<OfferModel> CREATOR = new Creator<OfferModel>() {
+        @Override
+        public OfferModel createFromParcel(Parcel in) {
+            return new OfferModel(in);
+        }
+
+        @Override
+        public OfferModel[] newArray(int size) {
+            return new OfferModel[size];
+        }
+    };
 
     @Attribute
     private String id;
@@ -42,13 +41,13 @@ public class Offer implements Parcelable {
     @Element
     private String url;
     @ElementList(inline = true, required = false)
-    private List<Param> param;
+    private List<ParamModel> param;
 
-    public Offer() {
+    public OfferModel() {
     }
 
-    public Offer(String id, String picture, String price, String description, String name,
-                 String categoryId, String url, List<Param> param) {
+    public OfferModel(String id, String picture, String price, String description, String name,
+                      String categoryId, String url, List<ParamModel> param) {
         this.id = id;
         this.picture = picture;
         this.price = price;
@@ -59,7 +58,7 @@ public class Offer implements Parcelable {
         this.param = param;
     }
 
-    protected Offer(Parcel in) {
+    protected OfferModel(Parcel in) {
         id = in.readString();
         picture = in.readString();
         price = in.readString();
@@ -97,22 +96,8 @@ public class Offer implements Parcelable {
         return url;
     }
 
-    public List<Param> getParams() {
+    public List<ParamModel> getParams() {
         return param;
-    }
-
-    @Override
-    public String toString() {
-        return "Offer{" +
-                "id='" + id + '\'' +
-                ", picture='" + picture + '\'' +
-                ", price='" + price + '\'' +
-                ", description='" + description + '\'' +
-                ", name='" + name + '\'' +
-                ", categoryId='" + categoryId + '\'' +
-                ", url='" + url + '\'' +
-                ", param=" + param +
-                '}';
     }
 
     @Override
@@ -129,6 +114,20 @@ public class Offer implements Parcelable {
         dest.writeString(name);
         dest.writeString(categoryId);
         dest.writeString(url);
+    }
+
+    @Override
+    public String toString() {
+        return "Offer{" +
+                "id='" + id + '\'' +
+                ", picture='" + picture + '\'' +
+                ", price='" + price + '\'' +
+                ", description='" + description + '\'' +
+                ", name='" + name + '\'' +
+                ", categoryId='" + categoryId + '\'' +
+                ", url='" + url + '\'' +
+                ", param=" + param +
+                '}';
     }
 
 }

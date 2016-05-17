@@ -8,7 +8,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.example.yegor.cafeapp.R;
 import com.example.yegor.cafeapp.Utils;
-import com.example.yegor.cafeapp.models.Offer;
+import com.example.yegor.cafeapp.models.OfferModel;
 
 public class OfferActivity extends BaseActivity {
 
@@ -28,7 +28,7 @@ public class OfferActivity extends BaseActivity {
         price = (TextView) findViewById(R.id.price);
         description = (TextView) findViewById(R.id.description);
 
-        Offer offer = getIntent().getParcelableExtra(Offer.EXTRA);
+        OfferModel offer = getIntent().getParcelableExtra(OfferModel.EXTRA);
 
         Glide.with(this)
                 .load(offer.getPicture())
@@ -60,12 +60,7 @@ public class OfferActivity extends BaseActivity {
         else
             description.setText(String.format(getString(R.string.name), offer.getDescription()));
 
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-            }
-        });
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
     }
 
