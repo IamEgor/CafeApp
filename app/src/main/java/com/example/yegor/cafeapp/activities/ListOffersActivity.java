@@ -78,8 +78,9 @@ public class ListOffersActivity extends BaseActivity implements
             errorMessage.setText(data.getException().getMessage());
             setStatus(Status.FAILED);
         } else {
-            Log.e("[Unknown exception]", data.getException().getMessage());
-            throw new RuntimeException("[Unknown exception] " + data.getException().getMessage());
+            //throw new RuntimeException("[Unknown exception] " + data.getException().getMessage());
+            errorMessage.setText("Smth went wrong. Please retry.");
+            setStatus(BaseActivity.Status.FAILED);
         }
 
     }

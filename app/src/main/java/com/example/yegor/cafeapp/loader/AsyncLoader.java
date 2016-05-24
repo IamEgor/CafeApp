@@ -46,6 +46,7 @@ public class AsyncLoader extends AsyncTaskLoader<ContentWrapper<List<OfferModel>
             return new ContentWrapper<>(new NoConnectionException());
         }
 
+        System.setProperty("http.keepAlive", "false");
         Cache cache = new Cache(new File(Utils.getInternalDirPath()), cacheSize);
 
         OkHttpClient client = new OkHttpClient.Builder()
