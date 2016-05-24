@@ -24,7 +24,7 @@
                 android:id="@+id/image"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:src="@drawable/ic_cat_custom_25" />
+                android:src="@drawable/placeholder" />
 
             <View
                 android:layout_width="match_parent"

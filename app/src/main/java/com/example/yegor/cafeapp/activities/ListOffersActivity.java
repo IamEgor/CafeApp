@@ -5,6 +5,7 @@ import android.content.Loader;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -13,8 +14,8 @@ import com.example.yegor.cafeapp.adapters.ListOffersAdapter;
 import com.example.yegor.cafeapp.exceptions.NoConnectionException;
 import com.example.yegor.cafeapp.loader.AsyncLoader;
 import com.example.yegor.cafeapp.models.CategoryModel;
-import com.example.yegor.cafeapp.models.adapter.ContentWrapper;
 import com.example.yegor.cafeapp.models.OfferModel;
+import com.example.yegor.cafeapp.models.adapter.ContentWrapper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,8 +77,10 @@ public class ListOffersActivity extends BaseActivity implements
         } else if (data.getException() instanceof NoConnectionException) {
             errorMessage.setText(data.getException().getMessage());
             setStatus(Status.FAILED);
-        } else
+        } else {
+            Log.e("[Unknown exception]", data.getException().getMessage());
             throw new RuntimeException("[Unknown exception] " + data.getException().getMessage());
+        }
 
     }
 

@@ -39,4 +39,8 @@ public class Utils {
         return (int) (dp * ((float) metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT));
     }
 
+    public static String getInternalDirPath() {
+        return App.getContext().getFilesDir().getAbsolutePath();
+    }
+
 }

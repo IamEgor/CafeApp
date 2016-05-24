@@ -10,10 +10,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.yegor.cafeapp.R;
-import com.example.yegor.cafeapp.Utils;
 import com.example.yegor.cafeapp.activities.OfferActivity;
 import com.example.yegor.cafeapp.models.OfferModel;
-import com.example.yegor.cafeapp.models.ParamModel;
 import com.example.yegor.cafeapp.storage.MySQLiteClass;
 
 import java.util.List;
@@ -48,7 +46,7 @@ public class ListOffersAdapter extends RecyclerView.Adapter<ListOffersAdapter.Vi
         holder.setIcon(Integer.parseInt(offer.getCategoryId()));
         holder.setLabel(offer.getName());
         holder.setPrice(offer.getPrice());
-        holder.setWeight(offer.getParams());
+        holder.setWeight(offer.getParams() != null ? offer.getParams().get("Вес") : "не указан");
 
         holder.setClickListener(v -> {
             Intent intent = new Intent(context, OfferActivity.class);
@@ -93,8 +91,8 @@ public class ListOffersAdapter extends RecyclerView.Adapter<ListOffersAdapter.Vi
             this.price.setText(String.format(context.getString(R.string.price), price));
         }
 
-        public void setWeight(List<ParamModel> params) {
-            String weight = Utils.getParamByName(params, "Вес");
+        public void setWeight(String weight) {
+            //Utils.getParamByName(params, "Вес");
             this.weight.setText(weight.length() == 0 ? weight :
                     String.format(context.getString(R.string.weight), weight));
         }

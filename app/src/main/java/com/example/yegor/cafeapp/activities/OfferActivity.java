@@ -7,7 +7,6 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.example.yegor.cafeapp.R;
-import com.example.yegor.cafeapp.Utils;
 import com.example.yegor.cafeapp.models.OfferModel;
 
 public class OfferActivity extends BaseActivity {
@@ -30,19 +29,20 @@ public class OfferActivity extends BaseActivity {
 
         OfferModel offer = getIntent().getParcelableExtra(OfferModel.EXTRA);
 
-        Glide.with(this)
-                .load(offer.getPicture())
-                .fitCenter()
-                .placeholder(R.drawable.placeholder)
-                .into(image);
-
+        if (offer.getPicture() != null)
+            Glide.with(this)
+                    .load(offer.getPicture())
+                    .fitCenter()
+                    .placeholder(R.drawable.placeholder)
+                    .into(image);
 
         if (offer.getPrice() == null || offer.getPrice().length() == 0)
             name.setVisibility(View.GONE);
         else
             name.setText(String.format(getString(R.string.name), offer.getName()));
 
-        String weightVal = Utils.getParamByName(offer.getParams(), "Вес");
+        String weightVal = offer.getParams() != null ? offer.getParams().get("Вес") : "не указан";//Utils.getParamByName(offer.getParams(), "Вес");
+
         if (weightVal.length() == 0)
             weight.setVisibility(View.GONE);
         else {

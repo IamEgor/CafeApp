@@ -5,14 +5,16 @@ import android.content.Context;
 
 import com.example.yegor.cafeapp.Utils;
 import com.example.yegor.cafeapp.exceptions.NoConnectionException;
-import com.example.yegor.cafeapp.models.adapter.ContentWrapper;
 import com.example.yegor.cafeapp.models.OfferModel;
 import com.example.yegor.cafeapp.models.YmlCatalogModel;
+import com.example.yegor.cafeapp.models.adapter.ContentWrapper;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Retrofit;
@@ -21,6 +23,7 @@ import retrofit2.http.GET;
 
 public class AsyncLoader extends AsyncTaskLoader<ContentWrapper<List<OfferModel>>> {
 
+    private static final int cacheSize = 1024 * 1024;// 1 MiB
     private static final String API_BASE_URL = "http://ufa.farfor.ru/getyml/";
 
     private int catId;
@@ -43,18 +46,25 @@ public class AsyncLoader extends AsyncTaskLoader<ContentWrapper<List<OfferModel>
             return new ContentWrapper<>(new NoConnectionException());
         }
 
+        Cache cache = new Cache(new File(Utils.getInternalDirPath()), cacheSize);
+
+        OkHttpClient client = new OkHttpClient.Builder()
+                .cache(cache)
+                .build();
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(API_BASE_URL)
-                .client(new OkHttpClient())
+                .client(client)
                 .addConverterFactory(SimpleXmlConverterFactory.create())
                 .build();
 
         Json service = retrofit.create(Json.class);
 
         Call<YmlCatalogModel> data = service.getAllOrders();
+
         try {
             List<OfferModel> offers = new ArrayList<>();
+
             for (OfferModel offer : data.execute().body().getShop().getOffers())
                 if (String.valueOf(catId).equals(offer.getCategoryId()))
                     offers.add(offer);

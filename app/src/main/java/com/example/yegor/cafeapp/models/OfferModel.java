@@ -5,19 +5,20 @@ import android.os.Parcelable;
 
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
-import org.simpleframework.xml.ElementList;
+import org.simpleframework.xml.ElementMap;
 import org.simpleframework.xml.Root;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @Root
 public class OfferModel implements Parcelable {
 
     public static final String EXTRA = "OFFER_EXTRA";
-    public static final Creator<OfferModel> CREATOR = new Creator<OfferModel>() {
+    public static final Parcelable.Creator<OfferModel> CREATOR = new Parcelable.Creator<OfferModel>() {
         @Override
-        public OfferModel createFromParcel(Parcel in) {
-            return new OfferModel(in);
+        public OfferModel createFromParcel(Parcel source) {
+            return new OfferModel(source);
         }
 
         @Override
@@ -28,7 +29,7 @@ public class OfferModel implements Parcelable {
 
     @Attribute
     private String id;
-    @Element
+    @Element(required = false)
     private String picture;
     @Element
     private String price;
@@ -40,14 +41,14 @@ public class OfferModel implements Parcelable {
     private String categoryId;
     @Element
     private String url;
-    @ElementList(inline = true, required = false)
-    private List<ParamModel> param;
+    @ElementMap(entry = "param", key = "name", attribute = true, inline = true, required = false)
+    private Map<String, String> param;
 
     public OfferModel() {
     }
 
     public OfferModel(String id, String picture, String price, String description, String name,
-                      String categoryId, String url, List<ParamModel> param) {
+                      String categoryId, String url, Map<String, String> param) {
         this.id = id;
         this.picture = picture;
         this.price = price;
@@ -59,13 +60,20 @@ public class OfferModel implements Parcelable {
     }
 
     protected OfferModel(Parcel in) {
-        id = in.readString();
-        picture = in.readString();
-        price = in.readString();
-        description = in.readString();
-        name = in.readString();
-        categoryId = in.readString();
-        url = in.readString();
+        this.id = in.readString();
+        this.picture = in.readString();
+        this.price = in.readString();
+        this.description = in.readString();
+        this.name = in.readString();
+        this.categoryId = in.readString();
+        this.url = in.readString();
+        int paramSize = in.readInt();
+        this.param = new HashMap<String, String>(paramSize);
+        for (int i = 0; i < paramSize; i++) {
+            String key = in.readString();
+            String value = in.readString();
+            this.param.put(key, value);
+        }
     }
 
     public String getId() {
@@ -96,7 +104,7 @@ public class OfferModel implements Parcelable {
         return url;
     }
 
-    public List<ParamModel> getParams() {
+    public Map<String, String> getParams() {
         return param;
     }
 
@@ -107,13 +115,18 @@ public class OfferModel implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(id);
-        dest.writeString(picture);
-        dest.writeString(price);
-        dest.writeString(description);
-        dest.writeString(name);
-        dest.writeString(categoryId);
-        dest.writeString(url);
+        dest.writeString(this.id);
+        dest.writeString(this.picture);
+        dest.writeString(this.price);
+        dest.writeString(this.description);
+        dest.writeString(this.name);
+        dest.writeString(this.categoryId);
+        dest.writeString(this.url);
+        dest.writeInt(this.param.size());
+        for (Map.Entry<String, String> entry : this.param.entrySet()) {
+            dest.writeString(entry.getKey());
+            dest.writeString(entry.getValue());
+        }
     }
 
     @Override
