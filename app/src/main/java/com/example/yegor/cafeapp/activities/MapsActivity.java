@@ -168,8 +168,11 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback {
                     && content.getException() instanceof NoConnectionException) {
                 errorMessage.setText(content.getException().getMessage());
                 setStatus(BaseActivity.Status.FAILED);
-            } else
-                throw new RuntimeException(content.getException().getMessage());
+            } else {
+                //throw new RuntimeException(content.getException().getMessage());
+                errorMessage.setText("Smth went wrong. Please retry.");
+                setStatus(BaseActivity.Status.FAILED);
+            }
 
         }
 

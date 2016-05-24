@@ -46,4 +46,6 @@ dependencies {
 
     compile 'com.wang.avi:library:1.0.5'
     compile 'com.nineoldandroids:library:2.4.0'
+
+    compile 'com.joshdholtz.sentry:sentry-android:1.4.0'
 }

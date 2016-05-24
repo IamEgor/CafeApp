@@ -11,4 +11,5 @@
     <string name="title_activity_maps">Map</string>
     <string name="retry">Retry</string>
     <string name="no_address">Не адреса для этого места</string>
+    <string name="dsn">https://d343bf98d4a94dbda0943d338654bee2:e436ac9c80364e849ba4c9d0c52367cc@app.getsentry.com/79799</string>
 </resources>
