@@ -19,7 +19,6 @@ import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
-import retrofit2.http.GET;
 
 public class AsyncLoader extends AsyncTaskLoader<ContentWrapper<List<OfferModel>>> {
 
@@ -59,7 +58,7 @@ public class AsyncLoader extends AsyncTaskLoader<ContentWrapper<List<OfferModel>
                 .addConverterFactory(SimpleXmlConverterFactory.create())
                 .build();
 
-        Json service = retrofit.create(Json.class);
+        ApiEndpointInterface service = retrofit.create(ApiEndpointInterface.class);
 
         Call<YmlCatalogModel> data = service.getAllOrders();
 
@@ -74,12 +73,6 @@ public class AsyncLoader extends AsyncTaskLoader<ContentWrapper<List<OfferModel>
         } catch (IOException e) {
             return new ContentWrapper<>(e);
         }
-
-    }
-
-    interface Json {
-        @GET("?key=ukAXxeJYZN")
-        Call<YmlCatalogModel> getAllOrders();
     }
 
 }

@@ -1,33 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <com.example.yegor.cafeapp.view.PercentLinearLayout
+    <android.support.v7.widget.CardView
+        android:id="@+id/cv"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_gravity="center"
-        android:background="#FFF"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:layout_height="wrap_content">
 
-        <ImageView
-            android:id="@+id/image"
+        <com.example.yegor.cafeapp.view.PercentLinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:src="@drawable/ic_cat_salad_7"
-            android:tint="@color/colorPrimaryLight" />
+            android:layout_height="0dp"
+            android:layout_gravity="center"
+            android:background="#FFF"
+            android:orientation="vertical"
+            android:padding="16dp">
 
-        <TextView
-            android:id="@+id/text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:text="Закуски"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            <ImageView
+                android:id="@+id/image"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:src="@drawable/ic_cat_salad_7"
+                android:tint="@color/colorPrimaryLight" />
 
-    </com.example.yegor.cafeapp.view.PercentLinearLayout>
+            <TextView
+                android:id="@+id/text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="Закуски"
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
-</android.support.v7.widget.CardView>
+        </com.example.yegor.cafeapp.view.PercentLinearLayout>
+
+    </android.support.v7.widget.CardView>
+
+</layout>

@@ -18,6 +18,12 @@ public abstract class BaseActivity extends AppCompatActivity implements
         NavigationView.OnNavigationItemSelectedListener {
 
     protected Toolbar toolbar;
+    @LayoutRes
+    private int layoutId;
+
+    public BaseActivity(@LayoutRes int layoutId) {
+        this.layoutId = layoutId;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,16 +38,15 @@ public abstract class BaseActivity extends AppCompatActivity implements
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
+        drawer.addDrawerListener(toggle);
         toggle.syncState();
 
         CoordinatorLayout coordinatorLayout = (CoordinatorLayout) findViewById(R.id.container);
 
-        coordinatorLayout.addView(getLayoutInflater().inflate(getLayoutId(), coordinatorLayout, false));
+        coordinatorLayout.addView(getLayoutInflater().inflate(layoutId, coordinatorLayout, false));
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
     }
 
     @Override
@@ -71,8 +76,7 @@ public abstract class BaseActivity extends AppCompatActivity implements
         return true;
     }
 
-    @LayoutRes
-    protected abstract int getLayoutId();
+    protected abstract void setStatus(Status status);
 
     protected enum Status {
         LOADING, OK, FAILED

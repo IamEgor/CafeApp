@@ -38,6 +38,10 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback {
     private GoogleMap mMap;
     private MapView mapView;
 
+    public MapsActivity() {
+        super(R.layout.activity_maps);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,12 +54,6 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback {
         mapView.getMapAsync(this);
 
         findViewById(R.id.retry_btn).setOnClickListener(v -> (new LoadMarkers(4)).execute());
-
-    }
-
-    @Override
-    protected int getLayoutId() {
-        return R.layout.activity_maps;
     }
 
     @Override
@@ -96,7 +94,8 @@ public class MapsActivity extends BaseActivity implements OnMapReadyCallback {
 
     }
 
-    private void setStatus(Status status) {
+    @Override
+    protected void setStatus(Status status) {
 
         switch (status) {
             case OK:

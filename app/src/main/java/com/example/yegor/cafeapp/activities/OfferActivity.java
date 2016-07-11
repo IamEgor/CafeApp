@@ -14,6 +14,10 @@ public class OfferActivity extends BaseActivity {
     private ImageView image;
     private TextView name, weight, price, description;
 
+    public OfferActivity() {
+        super(R.layout.activity_offer);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,12 +65,11 @@ public class OfferActivity extends BaseActivity {
             description.setText(String.format(getString(R.string.name), offer.getDescription()));
 
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
-
     }
 
     @Override
-    protected int getLayoutId() {
-        return R.layout.activity_offer;
+    protected void setStatus(Status status) {
+
     }
 
 }

@@ -62,7 +62,7 @@ public class ListOffersAdapter extends RecyclerView.Adapter<ListOffersAdapter.Vi
 
     class ViewHolder extends RecyclerView.ViewHolder {
 
-        private static final int LAYOUT_ID = R.layout.item_list_offer;
+        private static final int LAYOUT_ID = R.layout.item_offers;
 
         private ImageView icon;
         private TextView label, price, weight;
