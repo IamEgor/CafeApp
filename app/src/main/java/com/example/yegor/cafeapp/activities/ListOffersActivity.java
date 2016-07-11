@@ -59,7 +59,6 @@ public class ListOffersActivity extends BaseActivity {
         rv.setLayoutManager(new LinearLayoutManager(this));
         /*
         adapter = new ListOffersAdapter(this, new ArrayList<>(0));
-
         rv.setLayoutManager(new LinearLayoutManager(this));
         rv.setAdapter(adapter);
         rv.addItemDecoration(new ListDecorator(getResources().getDimension(R.dimen.offers_card_margin)));
