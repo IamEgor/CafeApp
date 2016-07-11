@@ -3,6 +3,9 @@ package com.example.yegor.cafeapp.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.example.yegor.cafeapp.R;
+import com.example.yegor.cafeapp.Utils;
+
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
 import org.simpleframework.xml.ElementMap;
@@ -106,6 +109,26 @@ public class OfferModel implements Parcelable {
 
     public Map<String, String> getParams() {
         return param;
+    }
+
+    public String getNameFormat() {
+        return String.format(Utils.getString(R.string.name), name);
+    }
+
+    public String getWeight() {
+        return param != null ? param.get("Вес") : "не указан";
+    }
+
+    public String getWeightFormat() {
+        return String.format(Utils.getString(R.string.weight), getWeight());
+    }
+
+    public String getPriceFormat() {
+        return String.format(Utils.getString(R.string.price), price);
+    }
+
+    public String getDescriptionFormat() {
+        return String.format(Utils.getString(R.string.name), description);
     }
 
     @Override

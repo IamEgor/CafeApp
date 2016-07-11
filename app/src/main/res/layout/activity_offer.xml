@@ -1,12 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior">
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
+    <data>
+
+        <import type="java.lang.String" />
+        <import type="android.view.View" />
+
+        <variable
+            name="offer"
+            type="com.example.yegor.cafeapp.models.OfferModel" />
+
+    </data>
+
+    <LinearLayout
+        android:id="@+id/binding_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -14,6 +23,7 @@
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingTop="@dimen/activity_vertical_margin"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
         tools:context="com.example.yegor.cafeapp.activities.OfferActivity">
 
         <FrameLayout
@@ -24,7 +34,8 @@
                 android:id="@+id/image"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:src="@drawable/placeholder" />
+                android:src="@drawable/placeholder"
+                app:imageUrl="@{offer.picture}" />
 
             <View
                 android:layout_width="match_parent"
@@ -36,7 +47,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
-                android:text="@string/name"
+                android:text="@{offer.nameFormat}"
                 android:textColor="@android:color/white"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -46,18 +57,20 @@
         <TextView
             android:id="@+id/weight"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:text="@{offer.weightFormat}" />
 
         <TextView
             android:id="@+id/price"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:text="@{offer.priceFormat}" />
 
         <TextView
             android:id="@+id/description"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:text="@{offer.descriptionFormat}" />
 
     </LinearLayout>
-
-</FrameLayout>
+</layout>

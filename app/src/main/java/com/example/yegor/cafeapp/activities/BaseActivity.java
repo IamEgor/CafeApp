@@ -11,6 +11,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.example.yegor.cafeapp.R;
 
@@ -19,10 +20,11 @@ public abstract class BaseActivity extends AppCompatActivity implements
 
     protected Toolbar toolbar;
     @LayoutRes
-    private int layoutId;
+    private int layoutRes;
+    protected View inflateView;
 
-    public BaseActivity(@LayoutRes int layoutId) {
-        this.layoutId = layoutId;
+    public BaseActivity(@LayoutRes int layoutRes) {
+        this.layoutRes = layoutRes;
     }
 
     @Override
@@ -43,7 +45,8 @@ public abstract class BaseActivity extends AppCompatActivity implements
 
         CoordinatorLayout coordinatorLayout = (CoordinatorLayout) findViewById(R.id.container);
 
-        coordinatorLayout.addView(getLayoutInflater().inflate(layoutId, coordinatorLayout, false));
+        inflateView = getLayoutInflater().inflate(layoutRes, coordinatorLayout, false);
+        coordinatorLayout.addView(inflateView);
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);

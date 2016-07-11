@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.support.annotation.StringRes;
 import android.util.DisplayMetrics;
 
 import com.example.yegor.cafeapp.models.CategoryModel;
@@ -25,6 +26,10 @@ public class Utils {
 
         return val;
 
+    }
+
+    public static String getString(@StringRes int id) {
+        return App.getContext().getString(id);
     }
 
     public static boolean hasConnection() {

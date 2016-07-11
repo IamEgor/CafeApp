@@ -1,18 +1,13 @@
 package com.example.yegor.cafeapp.activities;
 
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.example.yegor.cafeapp.R;
+import com.example.yegor.cafeapp.databinding.ActivityOfferBinding;
 import com.example.yegor.cafeapp.models.OfferModel;
 
 public class OfferActivity extends BaseActivity {
-
-    private ImageView image;
-    private TextView name, weight, price, description;
 
     public OfferActivity() {
         super(R.layout.activity_offer);
@@ -22,48 +17,12 @@ public class OfferActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        ActivityOfferBinding binding = DataBindingUtil.bind(inflateView);
+        binding.setOffer( getIntent().getParcelableExtra(OfferModel.EXTRA));
+
+
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-
-        image = (ImageView) findViewById(R.id.image);
-        name = (TextView) findViewById(R.id.name);
-        weight = (TextView) findViewById(R.id.weight);
-        price = (TextView) findViewById(R.id.price);
-        description = (TextView) findViewById(R.id.description);
-
-        OfferModel offer = getIntent().getParcelableExtra(OfferModel.EXTRA);
-
-        if (offer.getPicture() != null)
-            Glide.with(this)
-                    .load(offer.getPicture())
-                    .fitCenter()
-                    .placeholder(R.drawable.placeholder)
-                    .into(image);
-
-        if (offer.getPrice() == null || offer.getPrice().length() == 0)
-            name.setVisibility(View.GONE);
-        else
-            name.setText(String.format(getString(R.string.name), offer.getName()));
-
-        String weightVal = offer.getParams() != null ? offer.getParams().get("Вес") : "не указан";//Utils.getParamByName(offer.getParams(), "Вес");
-
-        if (weightVal.length() == 0)
-            weight.setVisibility(View.GONE);
-        else {
-            weight.setText(String.format(getString(R.string.weight), weightVal));
-            weight.setVisibility(View.VISIBLE);
-        }
-
-        if (offer.getPrice() == null || offer.getPrice().length() == 0)
-            price.setVisibility(View.GONE);
-        else
-            price.setText(String.format(getString(R.string.price), offer.getPrice()));
-
-        if (offer.getDescription() == null || offer.getDescription().length() == 0)
-            description.setVisibility(View.GONE);
-        else
-            description.setText(String.format(getString(R.string.name), offer.getDescription()));
-
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
     }
 

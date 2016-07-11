@@ -5,8 +5,10 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.yegor.cafeapp.R;
 import com.example.yegor.cafeapp.Utils;
@@ -16,10 +18,13 @@ import com.example.yegor.cafeapp.models.CategoryModel;
 import com.example.yegor.cafeapp.models.OfferModel;
 import com.example.yegor.cafeapp.models.YmlCatalogModel;
 import com.example.yegor.cafeapp.storage.MySQLiteClass;
+import com.example.yegor.cafeapp.view.ListDecorator;
 import com.minimize.android.rxrecycleradapter.RxDataSource;
 
 import java.io.File;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 import okhttp3.Cache;
@@ -38,6 +43,8 @@ public class ListOffersActivity extends BaseActivity {
     private View loadingView, errorView;
     private TextView errorMessage;
 
+    private ApiEndpointInterface apiEndpointInterface;
+    private RxDataSource<OfferModel> rxDataSource;
     //private ListOffersAdapter adapter;
 
     public ListOffersActivity() {
@@ -48,8 +55,11 @@ public class ListOffersActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
+
+        int catId = getIntent().getExtras().getInt(CategoryModel.ID_EXTRA);
 
         rv = (RecyclerView) findViewById(R.id.rv);
         loadingView = findViewById(R.id.loading_view);
@@ -57,6 +67,7 @@ public class ListOffersActivity extends BaseActivity {
         errorMessage = (TextView) findViewById(R.id.error_message);
 
         rv.setLayoutManager(new LinearLayoutManager(this));
+        rv.addItemDecoration(new ListDecorator(getResources().getDimension(R.dimen.offers_card_margin)));
         /*
         adapter = new ListOffersAdapter(this, new ArrayList<>(0));
         rv.setLayoutManager(new LinearLayoutManager(this));
@@ -71,18 +82,36 @@ public class ListOffersActivity extends BaseActivity {
 
         getLoaderManager().initLoader(0, getIntent().getExtras(), this).forceLoad();
         */
-        setRx(getIntent().getExtras().getInt(CategoryModel.ID_EXTRA));
+        rxDataSource = setupRxBinding();//
+        apiEndpointInterface = setupRetrofitClient();
+        setRx(catId);
+
+        findViewById(R.id.retry_btn).setOnClickListener(v -> setRx(catId));
     }
 
-    private void setRx(int catId) {
+    @Override
+    public boolean onOptionsItemSelected(MenuItem menuItem) {
 
+        if (menuItem.getItemId() == android.R.id.home) {
+            onBackPressed();
+            Toast.makeText(ListOffersActivity.this, "R.id.home", Toast.LENGTH_SHORT).show();
+            return true;
+        }
 
-        //rx binding
-        Map<Integer, Integer> map = (new MySQLiteClass(ListOffersActivity.this)).getId2ImageResMap();
+        return super.onOptionsItemSelected(menuItem);
+    }
+
+    private RxDataSource<OfferModel> setupRxBinding() {
+
+        Map<Integer, Integer> map = new HashMap<>();
 
         RxDataSource<OfferModel> rxDataSource = new RxDataSource<>(new ArrayList<>());
+
         rxDataSource
                 .<ItemOffersBinding>bindRecyclerView(rv, R.layout.item_offers)
+                .doOnSubscribe(() -> map.putAll((new MySQLiteClass(ListOffersActivity.this)).getId2ImageResMap()))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(viewHolder -> {
 
                     ItemOffersBinding layout = viewHolder.getViewDataBinding();
@@ -107,13 +136,18 @@ public class ListOffersActivity extends BaseActivity {
                         startActivity(intent);
                     });
                 });
-        //retrofit
 
+        return rxDataSource;
+    }
+
+    private ApiEndpointInterface setupRetrofitClient() {
+
+        //retrofit
         RxJavaCallAdapterFactory rxAdapter = RxJavaCallAdapterFactory.createWithScheduler(Schedulers.io());
 
         System.setProperty("http.keepAlive", "false");
         long cacheSize = 1024 * 1024;
-        ;
+
         Cache cache = new Cache(new File(Utils.getInternalDirPath()), cacheSize);
 
         OkHttpClient client = new OkHttpClient.Builder()
@@ -129,26 +163,40 @@ public class ListOffersActivity extends BaseActivity {
                 .addCallAdapterFactory(rxAdapter)
                 .build();
 
-        ApiEndpointInterface service = retrofit.create(ApiEndpointInterface.class);
+        return retrofit.create(ApiEndpointInterface.class);
+    }
 
-        Observable<YmlCatalogModel> call = service.getAllOrdersObservable();
-        call
-                .subscribeOn(Schedulers.io())
+    private void setRx(int catId) {
+
+        Observable<YmlCatalogModel> call = apiEndpointInterface.getAllOrdersObservable();
+        call.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe(() -> {
                     setStatus(Status.LOADING);
                     Log.w("getAllOrdersObservable", "doOnSubscribe");
                 })
-                .doOnUnsubscribe(() -> {
-                    setStatus(Status.OK);
-                    Log.w("getAllOrdersObservable", "doOnUnsubscribe");
-                })
                 .map(ymlCatalogModel -> ymlCatalogModel.getShop().getOffers())
                 .flatMap(offerModels -> Observable.from(offerModels))
                 .filter(offerModel -> (String.valueOf(catId).equals(offerModel.getCategoryId())))
-                .collect(() -> new ArrayList<OfferModel>(), (offerModels, offerModel) -> offerModels.add(offerModel) )
+                .collect(() -> new ArrayList<OfferModel>(), (offerModels, offerModel) -> offerModels.add(offerModel))
                 .map(offerModels -> rxDataSource.updateDataSet(offerModels))
-                .subscribe(offerModelRxDataSource -> offerModelRxDataSource.updateAdapter());
+                //.subscribe(offerModelRxDataSource -> offerModelRxDataSource.updateAdapter());
+                .subscribe(
+                        offerModelRxDataSource -> {
+                            offerModelRxDataSource.updateAdapter();
+                            setStatus(Status.OK);
+                        },
+                        throwable ->
+                        {
+                            if (throwable instanceof UnknownHostException ||
+                                    UnknownHostException.class.isInstance(throwable))
+
+                                errorMessage.setText(R.string.no_connection_exception);
+                            else
+                                errorMessage.setText(throwable.getMessage() + " " + throwable.toString());
+
+                            setStatus(Status.FAILED);
+                        });
     }
 
     /*
@@ -190,14 +238,14 @@ public class ListOffersActivity extends BaseActivity {
                 loadingView.setVisibility(View.VISIBLE);
                 break;
             case OK:
+                rv.setVisibility(View.VISIBLE);
                 errorView.setVisibility(View.GONE);
                 loadingView.setVisibility(View.GONE);
-                rv.setVisibility(View.VISIBLE);
                 break;
             case FAILED:
-                loadingView.setVisibility(View.GONE);
                 rv.setVisibility(View.GONE);
                 errorView.setVisibility(View.VISIBLE);
+                loadingView.setVisibility(View.GONE);
                 break;
         }
 
