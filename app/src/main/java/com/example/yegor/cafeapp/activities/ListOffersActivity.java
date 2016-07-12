@@ -33,8 +33,10 @@ import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
 import rx.Observable;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
 
 public class ListOffersActivity extends BaseActivity {
     //implements LoaderManager.LoaderCallbacks<ContentWrapper<List<OfferModel>>> {
@@ -45,7 +47,7 @@ public class ListOffersActivity extends BaseActivity {
 
     private ApiEndpointInterface apiEndpointInterface;
     private RxDataSource<OfferModel> rxDataSource;
-    //private ListOffersAdapter adapter;
+    private CompositeSubscription compositeSubscription = new CompositeSubscription();
 
     public ListOffersActivity() {
         super(R.layout.activity_list_offers);
@@ -68,25 +70,19 @@ public class ListOffersActivity extends BaseActivity {
 
         rv.setLayoutManager(new LinearLayoutManager(this));
         rv.addItemDecoration(new ListDecorator(getResources().getDimension(R.dimen.offers_card_margin)));
-        /*
-        adapter = new ListOffersAdapter(this, new ArrayList<>(0));
-        rv.setLayoutManager(new LinearLayoutManager(this));
-        rv.setAdapter(adapter);
-        rv.addItemDecoration(new ListDecorator(getResources().getDimension(R.dimen.offers_card_margin)));
 
-        toolbar.setNavigationOnClickListener(v -> onBackPressed());
-        findViewById(R.id.retry_btn).setOnClickListener(v ->
-                getLoaderManager()
-                        .restartLoader(0, getIntent().getExtras(), ListOffersActivity.this)
-                        .forceLoad());
-
-        getLoaderManager().initLoader(0, getIntent().getExtras(), this).forceLoad();
-        */
-        rxDataSource = setupRxBinding();//
+        rxDataSource = setupRxBinding();
         apiEndpointInterface = setupRetrofitClient();
         setRx(catId);
 
         findViewById(R.id.retry_btn).setOnClickListener(v -> setRx(catId));
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        compositeSubscription.unsubscribe();
     }
 
     @Override
@@ -99,6 +95,29 @@ public class ListOffersActivity extends BaseActivity {
         }
 
         return super.onOptionsItemSelected(menuItem);
+    }
+
+    @Override
+    protected void setStatus(Status status) {
+
+        switch (status) {
+            case LOADING:
+                rv.setVisibility(View.GONE);
+                errorView.setVisibility(View.GONE);
+                loadingView.setVisibility(View.VISIBLE);
+                break;
+            case OK:
+                rv.setVisibility(View.VISIBLE);
+                errorView.setVisibility(View.GONE);
+                loadingView.setVisibility(View.GONE);
+                break;
+            case FAILED:
+                rv.setVisibility(View.GONE);
+                errorView.setVisibility(View.VISIBLE);
+                loadingView.setVisibility(View.GONE);
+                break;
+        }
+
     }
 
     private RxDataSource<OfferModel> setupRxBinding() {
@@ -169,16 +188,16 @@ public class ListOffersActivity extends BaseActivity {
     private void setRx(int catId) {
 
         Observable<YmlCatalogModel> call = apiEndpointInterface.getAllOrdersObservable();
-        call.subscribeOn(Schedulers.io())
+        Subscription subscribe = call.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSubscribe(() -> {
                     setStatus(Status.LOADING);
                     Log.w("getAllOrdersObservable", "doOnSubscribe");
                 })
                 .map(ymlCatalogModel -> ymlCatalogModel.getShop().getOffers())
-                .flatMap(offerModels -> Observable.from(offerModels))
+                .flatMap(Observable::from)
                 .filter(offerModel -> (String.valueOf(catId).equals(offerModel.getCategoryId())))
-                .collect(() -> new ArrayList<OfferModel>(), (offerModels, offerModel) -> offerModels.add(offerModel))
+                .collect(() -> new ArrayList<OfferModel>(), ArrayList::add)
                 .map(offerModels -> rxDataSource.updateDataSet(offerModels))
                 //.subscribe(offerModelRxDataSource -> offerModelRxDataSource.updateAdapter());
                 .subscribe(
@@ -197,58 +216,8 @@ public class ListOffersActivity extends BaseActivity {
 
                             setStatus(Status.FAILED);
                         });
-    }
 
-    /*
-    @Override
-    public Loader<ContentWrapper<List<OfferModel>>> onCreateLoader(int id, Bundle args) {
-        setStatus(Status.LOADING);
-        return new AsyncLoader(this, args.getInt(CategoryModel.ID_EXTRA));
-    }
-
-    @Override
-    public void onLoadFinished(Loader<ContentWrapper<List<OfferModel>>> loader,
-                               ContentWrapper<List<OfferModel>> data) {
-
-        if (data.getException() == null && data.getContent() != null) {
-            adapter.setModels(data.getContent());
-            setStatus(Status.OK);
-        } else if (data.getException() instanceof NoConnectionException) {
-            errorMessage.setText(data.getException().getMessage());
-            setStatus(Status.FAILED);
-        } else {
-            //throw new RuntimeException("[Unknown exception] " + data.getException().getMessage());
-            errorMessage.setText("Smth went wrong. Please retry.");
-            setStatus(BaseActivity.Status.FAILED);
-        }
-    }
-
-    @Override
-    public void onLoaderReset(Loader<ContentWrapper<List<OfferModel>>> loader) {
-        adapter.setModels(new ArrayList<>(0));
-    }
-    */
-    @Override
-    protected void setStatus(Status status) {
-
-        switch (status) {
-            case LOADING:
-                rv.setVisibility(View.GONE);
-                errorView.setVisibility(View.GONE);
-                loadingView.setVisibility(View.VISIBLE);
-                break;
-            case OK:
-                rv.setVisibility(View.VISIBLE);
-                errorView.setVisibility(View.GONE);
-                loadingView.setVisibility(View.GONE);
-                break;
-            case FAILED:
-                rv.setVisibility(View.GONE);
-                errorView.setVisibility(View.VISIBLE);
-                loadingView.setVisibility(View.GONE);
-                break;
-        }
-
+        compositeSubscription.add(subscribe);
     }
 
 }

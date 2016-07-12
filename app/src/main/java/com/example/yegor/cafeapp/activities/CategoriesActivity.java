@@ -19,13 +19,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import rx.Observable;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+import rx.subscriptions.CompositeSubscription;
 
 
 public class CategoriesActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    private CompositeSubscription compositeSubscription = new CompositeSubscription();
     private View loadingView;
 
     public CategoriesActivity() {
@@ -57,7 +60,7 @@ public class CategoriesActivity extends BaseActivity
                     });
                 });
 
-        Observable
+        Subscription subscribe = Observable
                 .create((Observable.OnSubscribe<List<CategoryModel>>) subscriber -> {
                     subscriber.onNext(getCategoryModels());
                     subscriber.onCompleted();
@@ -68,6 +71,15 @@ public class CategoriesActivity extends BaseActivity
                 .doOnUnsubscribe(() -> setStatus(Status.OK))
                 .map(categoryModels2 -> rxDataSource.updateDataSet(categoryModels2))
                 .subscribe(categoryModelRxDataSource -> categoryModelRxDataSource.updateAdapter());
+
+        compositeSubscription.add(subscribe);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        compositeSubscription.unsubscribe();
     }
 
     @Override

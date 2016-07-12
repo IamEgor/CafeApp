@@ -20,7 +20,6 @@ public class OfferActivity extends BaseActivity {
         ActivityOfferBinding binding = DataBindingUtil.bind(inflateView);
         binding.setOffer( getIntent().getParcelableExtra(OfferModel.EXTRA));
 
-
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
