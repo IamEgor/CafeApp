@@ -1,9 +1,12 @@
 package com.example.yegor.cafeapp;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.support.annotation.StringRes;
 import android.util.DisplayMetrics;
 
@@ -32,12 +35,32 @@ public class Utils {
         return App.getContext().getString(id);
     }
 
+    public static boolean isLollipop() {
+        return android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
+    }
+
     public static boolean hasConnection() {
         ConnectivityManager cm =
                 (ConnectivityManager) App.getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
 
         return netInfo != null && netInfo.isConnectedOrConnecting();
+    }
+
+    public static boolean isPortrait(Activity activity) {
+
+        Point size = new Point();
+        activity.getWindowManager().getDefaultDisplay().getSize(size);
+
+        return size.x < size.y;
+    }
+
+    public static int getScreenWidth(Activity activity) {
+
+        Point size = new Point();
+        activity.getWindowManager().getDefaultDisplay().getSize(size);
+
+        return size.x;
     }
 
     public static int dp2pixel(float dp) {

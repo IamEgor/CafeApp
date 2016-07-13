@@ -2,12 +2,16 @@ package com.example.yegor.cafeapp.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.example.yegor.cafeapp.R;
 import com.example.yegor.cafeapp.Utils;
 import com.example.yegor.cafeapp.databinding.ItemOffersBinding;
@@ -25,6 +29,8 @@ import java.util.ArrayList;
 import io.realm.Realm;
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
@@ -54,7 +60,10 @@ public class ListOffersActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        realm= Realm.getDefaultInstance();
+        //overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_left);
+
+        realm = Realm.getDefaultInstance();
 
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -67,7 +76,7 @@ public class ListOffersActivity extends BaseActivity {
         errorView = findViewById(R.id.error_view);
         errorMessage = (TextView) findViewById(R.id.error_message);
 
-        rv.setLayoutManager(new LinearLayoutManager(this));
+        rv.setLayoutManager(Utils.isPortrait(this) ? new LinearLayoutManager(this) : new GridLayoutManager(this, 3));
         rv.addItemDecoration(new ListDecorator(getResources().getDimension(R.dimen.offers_card_margin)));
 
         rxDataSource = setupRxBinding();
@@ -75,6 +84,21 @@ public class ListOffersActivity extends BaseActivity {
         setRx(catId);
 
         findViewById(R.id.retry_btn).setOnClickListener(v -> setRx(catId));
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        //overridePendingTransition(R.anim.slide_in_left, R.anim.slide_in_right);
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_right);
     }
 
     @Override
@@ -110,8 +134,6 @@ public class ListOffersActivity extends BaseActivity {
 
     private RxDataSource<OfferModel> setupRxBinding() {
 
-       // Map<Integer, Integer> map = new HashMap<>();
-
         RxDataSource<OfferModel> rxDataSource = new RxDataSource<>(new ArrayList<>());
 
         rxDataSource
@@ -127,21 +149,43 @@ public class ListOffersActivity extends BaseActivity {
                             .equalTo("id", Integer.parseInt(model.getCategoryId()))
                             .findFirst();
 
-                    if (categoryModel == null)
+                    boolean portrait = Utils.isPortrait(ListOffersActivity.this);
+                    if (!portrait)
+                        Glide.with(this)
+                                .load(model.getPicture())
+                                .centerCrop()
+                                .placeholder(R.drawable.placeholder)
+                                .into(layout.icon);
+                    else if (categoryModel == null)
                         layout.icon.setImageResource(R.drawable.ic_cat_unknown_0);
                     else
                         layout.icon.setImageResource(categoryModel.getImage());
 
-                    String weight = model.getParams() != null ? model.getParams().get("Вес") : "не указан";
-                    layout.weight.setText(weight.length() == 0 ? weight :
-                            String.format(getString(R.string.weight), weight));
-                    layout.label.setText(String.format(getString(R.string.name), model.getName()));
-                    layout.price.setText(String.format(getString(R.string.price), model.getPrice()));
+                    if (portrait) {
+                        String weight = model.getParams() != null ?
+                                model.getParams().get("Вес") :
+                                "не указан";
 
+                        layout.weight.setText(weight.length() == 0 ? weight :
+                                String.format(getString(R.string.weight), weight));
+                        layout.price.setText(String.format(getString(R.string.price),
+                                model.getPrice()));
+                    } else {
+                        ViewGroup.LayoutParams params = layout.cv.getLayoutParams();
+                        params.height = Utils.getScreenWidth(this) / 3;
+                        layout.cv.setLayoutParams(params);
+                    }
+
+                    layout.label.setText(String.format(getString(R.string.name), model.getName()));
                     layout.cv.setOnClickListener(view -> {
                         Intent intent = new Intent(ListOffersActivity.this, OfferActivity.class);
                         intent.putExtra(OfferModel.EXTRA, model);
-                        startActivity(intent);
+                        if (Utils.isLollipop() && !Utils.isPortrait(this)) {
+                            ActivityOptionsCompat options = ActivityOptionsCompat.
+                                    makeSceneTransitionAnimation(this, layout.icon, "offer_transition");
+                            startActivity(intent, options.toBundle());
+                        } else
+                            startActivity(intent);
                     });
                 });
 
@@ -154,12 +198,38 @@ public class ListOffersActivity extends BaseActivity {
         RxJavaCallAdapterFactory rxAdapter = RxJavaCallAdapterFactory.createWithScheduler(Schedulers.io());
 
         System.setProperty("http.keepAlive", "false");
-        long cacheSize = 1024 * 1024;
+        final long cacheSize = 10 * 1024 * 1024;
 
-        Cache cache = new Cache(new File(Utils.getInternalDirPath()), cacheSize);
+        Cache cache = new Cache(new File(Utils.getInternalDirPath(), "responses"), cacheSize);
 
         OkHttpClient client = new OkHttpClient.Builder()
                 .cache(cache)
+                .addInterceptor(chain -> {
+                    Request originalRequest = chain.request();
+                    String cacheHeaderValue = Utils.hasConnection()
+                            ? "public, max-age=2419200"
+                            : "public, only-if-cached, max-stale=2419200";
+                    Request request = originalRequest.newBuilder().build();
+                    Response response = chain.proceed(request);
+                    return response.newBuilder()
+                            .removeHeader("Pragma")
+                            .removeHeader("Cache-Control")
+                            .header("Cache-Control", cacheHeaderValue)
+                            .build();
+                })
+                .addNetworkInterceptor(chain -> {
+                    Request originalRequest = chain.request();
+                    String cacheHeaderValue = Utils.hasConnection()
+                            ? "public, max-age=2419200"
+                            : "public, only-if-cached, max-stale=2419200";
+                    Request request = originalRequest.newBuilder().build();
+                    Response response = chain.proceed(request);
+                    return response.newBuilder()
+                            .removeHeader("Pragma")
+                            .removeHeader("Cache-Control")
+                            .header("Cache-Control", cacheHeaderValue)
+                            .build();
+                })
                 .build();
 
         String API_BASE_URL = "http://ufa.farfor.ru/getyml/";

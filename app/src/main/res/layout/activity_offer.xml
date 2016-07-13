@@ -6,6 +6,7 @@
     <data>
 
         <import type="java.lang.String" />
+
         <import type="android.view.View" />
 
         <variable
@@ -40,7 +41,9 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@drawable/background_scrim" />
+                android:background="@drawable/background_scrim"
+                android:transitionName="offer_transition"
+                tools:targetApi="lollipop" />
 
             <TextView
                 android:id="@+id/name"
@@ -70,7 +73,8 @@
             android:id="@+id/description"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@{offer.descriptionFormat}" />
+            android:text="@{offer.descriptionFormat}"
+            android:visibility="@{offer.description == null? View.GONE : View.VISIBLE}" />
 
     </LinearLayout>
 </layout>

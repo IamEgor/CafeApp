@@ -8,6 +8,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
 import com.example.yegor.cafeapp.R;
+import com.example.yegor.cafeapp.Utils;
 import com.example.yegor.cafeapp.databinding.ItemCategoriesBinding;
 import com.example.yegor.cafeapp.models.RealmCategoryModel;
 import com.example.yegor.cafeapp.view.GridDecorator;
@@ -37,12 +38,15 @@ public class CategoriesActivity extends BaseActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        //overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+        //overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_left);
+
         realm = Realm.getDefaultInstance();
 
         loadingView = findViewById(R.id.loading_view);
         RecyclerView rv = (RecyclerView) findViewById(R.id.rv);
 
-        rv.setLayoutManager(new GridLayoutManager(this, 2));
+        rv.setLayoutManager(new GridLayoutManager(this, Utils.isPortrait(this) ? 2 : 3));
         rv.addItemDecoration(new GridDecorator(getResources().getDimension(R.dimen.category_card_margin)));
 
         RxDataSource<RealmCategoryModel> rxDataSource = new RxDataSource<>(new ArrayList<>());
@@ -71,6 +75,14 @@ public class CategoriesActivity extends BaseActivity
                 .subscribe(RxDataSource::updateAdapter);
 
         compositeSubscription.add(subscriber);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        //overridePendingTransition(R.anim.slide_in_left, R.anim.slide_in_right);
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_right);
     }
 
     @Override

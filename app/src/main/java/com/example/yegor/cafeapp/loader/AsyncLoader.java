@@ -16,13 +16,14 @@ import java.util.List;
 
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
+import okhttp3.Response;
 import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
 
 public class AsyncLoader extends AsyncTaskLoader<ContentWrapper<List<OfferModel>>> {
 
-    private static final int cacheSize = 1024 * 1024;// 1 MiB
+    private static final int CACHE_SIZE = 10 * 1024 * 1024;// 10 MB
     private static final String API_BASE_URL = "http://ufa.farfor.ru/getyml/";
 
     private int catId;
@@ -38,7 +39,7 @@ public class AsyncLoader extends AsyncTaskLoader<ContentWrapper<List<OfferModel>
 
         if (!Utils.hasConnection()) {
             try {
-                Thread.sleep(350);//for beauty
+                Thread.sleep(500);//for beauty
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -46,10 +47,24 @@ public class AsyncLoader extends AsyncTaskLoader<ContentWrapper<List<OfferModel>
         }
 
         System.setProperty("http.keepAlive", "false");
-        Cache cache = new Cache(new File(Utils.getInternalDirPath()), cacheSize);
+        Cache cache = new Cache(new File(Utils.getInternalDirPath(), "responses"), CACHE_SIZE);
 
         OkHttpClient client = new OkHttpClient.Builder()
                 .cache(cache)
+                .addInterceptor(chain -> {
+                    Response originalResponse = chain.proceed(chain.request());
+                    if (Utils.hasConnection()) {
+                        int maxAge = 10 * 60; // read from cache for 10 minutes
+                        return originalResponse.newBuilder()
+                                .header("Cache-Control", "public, max-age=" + maxAge)
+                                .build();
+                    } else {
+                        int maxStale = 60 * 60 * 24; // tolerate 1 day stale
+                        return originalResponse.newBuilder()
+                                .header("Cache-Control", "public, only-if-cached, max-stale=" + maxStale)
+                                .build();
+                    }
+                })
                 .build();
 
         Retrofit retrofit = new Retrofit.Builder()
@@ -62,7 +77,9 @@ public class AsyncLoader extends AsyncTaskLoader<ContentWrapper<List<OfferModel>
 
         Call<YmlCatalogModel> data = service.getAllOrders();
 
-        try {
+        try
+
+        {
             List<OfferModel> offers = new ArrayList<>();
 
             for (OfferModel offer : data.execute().body().getShop().getOffers())
@@ -70,7 +87,11 @@ public class AsyncLoader extends AsyncTaskLoader<ContentWrapper<List<OfferModel>
                     offers.add(offer);
 
             return new ContentWrapper<>(offers);
-        } catch (IOException e) {
+        } catch (
+                IOException e
+                )
+
+        {
             return new ContentWrapper<>(e);
         }
     }
