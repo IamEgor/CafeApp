@@ -46,7 +46,7 @@ public abstract class BaseActivity extends AppCompatActivity implements
         CoordinatorLayout coordinatorLayout = (CoordinatorLayout) findViewById(R.id.container);
 
         inflateView = getLayoutInflater().inflate(layoutRes, coordinatorLayout, false);
-        coordinatorLayout.addView(inflateView);
+        coordinatorLayout.addView(inflateView, 1);
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);

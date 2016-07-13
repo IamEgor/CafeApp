@@ -5,28 +5,24 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.yegor.cafeapp.R;
 import com.example.yegor.cafeapp.Utils;
 import com.example.yegor.cafeapp.databinding.ItemOffersBinding;
 import com.example.yegor.cafeapp.loader.ApiEndpointInterface;
-import com.example.yegor.cafeapp.models.CategoryModel;
 import com.example.yegor.cafeapp.models.OfferModel;
+import com.example.yegor.cafeapp.models.RealmCategoryModel;
 import com.example.yegor.cafeapp.models.YmlCatalogModel;
-import com.example.yegor.cafeapp.storage.MySQLiteClass;
 import com.example.yegor.cafeapp.view.ListDecorator;
 import com.minimize.android.rxrecycleradapter.RxDataSource;
 
 import java.io.File;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
+import io.realm.Realm;
 import okhttp3.Cache;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
@@ -48,6 +44,7 @@ public class ListOffersActivity extends BaseActivity {
     private ApiEndpointInterface apiEndpointInterface;
     private RxDataSource<OfferModel> rxDataSource;
     private CompositeSubscription compositeSubscription = new CompositeSubscription();
+    private Realm realm;
 
     public ListOffersActivity() {
         super(R.layout.activity_list_offers);
@@ -57,11 +54,13 @@ public class ListOffersActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        realm= Realm.getDefaultInstance();
+
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
-        int catId = getIntent().getExtras().getInt(CategoryModel.ID_EXTRA);
+        int catId = getIntent().getExtras().getInt(RealmCategoryModel.ID_EXTRA);
 
         rv = (RecyclerView) findViewById(R.id.rv);
         loadingView = findViewById(R.id.loading_view);
@@ -83,18 +82,7 @@ public class ListOffersActivity extends BaseActivity {
         super.onDestroy();
 
         compositeSubscription.unsubscribe();
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem menuItem) {
-
-        if (menuItem.getItemId() == android.R.id.home) {
-            onBackPressed();
-            Toast.makeText(ListOffersActivity.this, "R.id.home", Toast.LENGTH_SHORT).show();
-            return true;
-        }
-
-        return super.onOptionsItemSelected(menuItem);
+        realm.close();
     }
 
     @Override
@@ -122,13 +110,12 @@ public class ListOffersActivity extends BaseActivity {
 
     private RxDataSource<OfferModel> setupRxBinding() {
 
-        Map<Integer, Integer> map = new HashMap<>();
+       // Map<Integer, Integer> map = new HashMap<>();
 
         RxDataSource<OfferModel> rxDataSource = new RxDataSource<>(new ArrayList<>());
 
         rxDataSource
                 .<ItemOffersBinding>bindRecyclerView(rv, R.layout.item_offers)
-                .doOnSubscribe(() -> map.putAll((new MySQLiteClass(ListOffersActivity.this)).getId2ImageResMap()))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(viewHolder -> {
@@ -136,12 +123,14 @@ public class ListOffersActivity extends BaseActivity {
                     ItemOffersBinding layout = viewHolder.getViewDataBinding();
                     OfferModel model = viewHolder.getItem();
 
-                    int id = Integer.parseInt(model.getCategoryId());
+                    RealmCategoryModel categoryModel = realm.where(RealmCategoryModel.class)
+                            .equalTo("id", Integer.parseInt(model.getCategoryId()))
+                            .findFirst();
 
-                    if (map.get(id) == null)
+                    if (categoryModel == null)
                         layout.icon.setImageResource(R.drawable.ic_cat_unknown_0);
                     else
-                        layout.icon.setImageResource(map.get(id));
+                        layout.icon.setImageResource(categoryModel.getImage());
 
                     String weight = model.getParams() != null ? model.getParams().get("Вес") : "не указан";
                     layout.weight.setText(weight.length() == 0 ? weight :

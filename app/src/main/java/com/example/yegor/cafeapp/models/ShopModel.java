@@ -9,19 +9,19 @@ import java.util.List;
 public class ShopModel {
 
     @ElementList(name = "categories")
-    private List<CategoryModel> categories;
+    private List<RealmCategoryModel> categories;
     @ElementList
     private List<OfferModel> offers;
 
     public ShopModel() {
     }
 
-    public ShopModel(List<CategoryModel> categories, List<OfferModel> offers) {
+    public ShopModel(List<RealmCategoryModel> categories, List<OfferModel> offers) {
         this.categories = categories;
         this.offers = offers;
     }
 
-    public List<CategoryModel> getCategories() {
+    public List<RealmCategoryModel> getCategories() {
         return categories;
     }
 

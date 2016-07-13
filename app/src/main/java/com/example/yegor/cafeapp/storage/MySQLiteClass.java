@@ -6,8 +6,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteStatement;
 
-import com.example.yegor.cafeapp.models.CategoryModel;
+import com.example.yegor.cafeapp.models.RealmCategoryModel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,6 +38,7 @@ public class MySQLiteClass {
             thisDataBase = dbhelp.getWritableDatabase();
         else
             thisDataBase = dbhelp.getReadableDatabase();
+
         return this;
     }
 
@@ -45,37 +47,62 @@ public class MySQLiteClass {
     }
 
     public boolean isCatTableExists() {
+
         if (dbhelp == null)
             dbhelp = new DBHelp(context);
-        return dbhelp.isTableExists(thisDataBase, CATEGORY_TABLE);
+
+        //open(true);
+        boolean tableExists = dbhelp.isTableExists(thisDataBase, CATEGORY_TABLE);
+        //close();
+
+        return tableExists;
     }
 
-    private void addCategory(CategoryModel category) {
+    private void addCategory(RealmCategoryModel category) {
 
         ContentValues values = new ContentValues();
 
-        values.put(CategoryModel.ID, category.getId());
-        values.put(CategoryModel.NAME, category.getCategory());
-        values.put(CategoryModel.IMAGE, category.getImage());
+        values.put(RealmCategoryModel.ID, category.getId());
+        values.put(RealmCategoryModel.NAME, category.getCategory());
+        values.put(RealmCategoryModel.IMAGE, category.getImage());
 
         thisDataBase.insert(CATEGORY_TABLE, null, values);
 
     }
 
-    public void addCategories(List<CategoryModel> categories) {
+    public void addCategories(List<RealmCategoryModel> categories) {
 
         open(true);
 
-        for (CategoryModel category : categories)
-            addCategory(category);
+        String sql = "INSERT INTO " + CATEGORY_TABLE + " VALUES (?,?,?,?);";
+        SQLiteStatement statement = thisDataBase.compileStatement(sql);
+
+        thisDataBase.beginTransaction();
+
+        int i = 1;
+
+        for (RealmCategoryModel model : categories) {
+
+            statement.clearBindings();
+            statement.bindLong(1, i);
+            statement.bindLong(2, model.getId());
+            statement.bindString(3, model.getCategory());
+            statement.bindLong(4, model.getImage());
+
+            statement.execute();
+
+            i++;
+        }
+
+        thisDataBase.setTransactionSuccessful();
+        thisDataBase.endTransaction();
 
         close();
-
     }
 
-    public List<CategoryModel> getAllCategories() {
+    public List<RealmCategoryModel> getAllCategories() {
 
-        List<CategoryModel> categories = new ArrayList<>();
+        List<RealmCategoryModel> categories = new ArrayList<>();
 
         String selectQuery = "SELECT  * FROM " + CATEGORY_TABLE;
 
@@ -84,9 +111,10 @@ public class MySQLiteClass {
         Cursor cursor = thisDataBase.rawQuery(selectQuery, null);
 
         if (cursor.moveToFirst()) {
+
             do {
 
-                CategoryModel contact = new CategoryModel.Builder()
+                RealmCategoryModel contact = new RealmCategoryModel.Builder()
                         .setId(Integer.parseInt(cursor.getString(1)))
                         .setCategory(cursor.getString(2))
                         .setImage(Integer.parseInt(cursor.getString(3)))
@@ -95,7 +123,6 @@ public class MySQLiteClass {
                 categories.add(contact);
 
             } while (cursor.moveToNext());
-
         }
 
         cursor.close();
@@ -112,7 +139,7 @@ public class MySQLiteClass {
 
         Cursor cursor = thisDataBase.query(
                 CATEGORY_TABLE,
-                new String[]{CategoryModel.ID, CategoryModel.IMAGE},
+                new String[]{RealmCategoryModel.ID, RealmCategoryModel.IMAGE},
                 null, null, null, null, null);
 
         if (cursor.moveToFirst()) {
@@ -125,7 +152,6 @@ public class MySQLiteClass {
         close();
 
         return map;
-
     }
 
     private class DBHelp extends SQLiteOpenHelper {
@@ -133,9 +159,9 @@ public class MySQLiteClass {
         private final String CREATE_CURRENCY_TABLE =
                 "CREATE TABLE " + CATEGORY_TABLE + "(" +
                         "_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                        CategoryModel.ID + " INTEGER, " +
-                        CategoryModel.NAME + " TEXT NOT NULL, " +
-                        CategoryModel.IMAGE + " INTEGER);";
+                        RealmCategoryModel.ID + " INTEGER, " +
+                        RealmCategoryModel.NAME + " TEXT NOT NULL, " +
+                        RealmCategoryModel.IMAGE + " INTEGER);";
 
         public DBHelp(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -151,7 +177,8 @@ public class MySQLiteClass {
         }
 
         boolean isTableExists(SQLiteDatabase db, String tableName) {
-            if (tableName == null || db == null || !db.isOpen()) {
+
+            if (tableName == null || db == null || !db.isOpen()) {//// TODO: 12.07.16 open db
                 return false;
             }
             Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM sqlite_master WHERE type = ? AND name = ?",
@@ -162,6 +189,7 @@ public class MySQLiteClass {
             }
             int count = cursor.getInt(0);
             cursor.close();
+
             return count > 0;
         }
 

@@ -6,12 +6,19 @@ import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Root;
 import org.simpleframework.xml.Text;
 
-@Root
-public class CategoryModel {
+import io.realm.RealmObject;
+import io.realm.annotations.Ignore;
 
+@Root
+public class RealmCategoryModel extends RealmObject {
+
+    @Ignore
     public static final String ID_EXTRA = "ID_EXTRA";
+    @Ignore
     public static final String ID = "ID";
+    @Ignore
     public static final String NAME = "NAME";
+    @Ignore
     public static final String IMAGE = "IMAGE";
 
     @Attribute
@@ -21,10 +28,10 @@ public class CategoryModel {
     @DrawableRes
     private int image;
 
-    public CategoryModel() {
+    public RealmCategoryModel() {
     }
 
-    public CategoryModel(int id, String category, int image) {
+    public RealmCategoryModel(int id, String category, int image) {
         this.id = id;
         this.category = category;
         this.image = image;
@@ -72,8 +79,8 @@ public class CategoryModel {
             return this;
         }
 
-        public CategoryModel create() {
-            return new CategoryModel(id, category, image);
+        public RealmCategoryModel create() {
+            return new RealmCategoryModel(id, category, image);
         }
     }
 
